@@ -31,12 +31,12 @@ class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS, object):
         else:
             score = await super().score_offer(offer, history)
 
-        if score != SCORE_REJECTED:
-            print(f'ACCEPTED offer from {offer.props["golem.node.id.name"]}', flush=True)
-            if len(provider_names) > 0:
+        if len(provider_names) > 0:
+            if score != SCORE_REJECTED:
+                print(f'ACCEPTED offer from {offer.props["golem.node.id.name"]}', flush=True)
                 print(f'\n{offer.props}\n')
-        else:
-            print(f'REJECTED offer from {offer.props["golem.node.id.name"]}', flush=True)
+            else:
+                print(f'REJECTED offer from {offer.props["golem.node.id.name"]}', flush=True)
 
         return score
 
