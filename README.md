@@ -42,6 +42,7 @@ then, on the requestor side (defaulting to testnet), e.g. using the blender exam
 
 ```requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py```
 
+### specific example with a twist
 it may be desirable to see how long it takes a file to upload to your provider.
 blender may be useful for this purpose. create a file of desired length, let's say, 100M, and use it instead of cubes.blend
 ```
@@ -52,6 +53,6 @@ requestor$ ln -sf randomfile cubes.blend
 requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py
 ```
 
-### comments
+# comments
 if you do not set the GNPROVIDER environment variable, the script passes the default LeastExpensiveLinearPayuMS to run as normal.
 ref: https://github.com/golemfactory/yapapi/blob/0.7.0/yapapi/engine.py#L134
