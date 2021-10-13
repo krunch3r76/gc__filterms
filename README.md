@@ -6,13 +6,15 @@ first clone the repo into your script directory
 
 ```$ git clone https://github.com/krunch3r76/filterms```
 
+
+## script file setup
+
 add the following import statement to the py script that instantiates the Golem object
 
 ```from filterms import filterProviderMS```
 
 when instantiating the Golem object, assign **filterProviderMS** to the the named parameter _strategy_:
 
-## script file setup
 ```
     async with Golem(
         budget=10.0,
