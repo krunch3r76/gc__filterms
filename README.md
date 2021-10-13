@@ -33,14 +33,17 @@ set the environment variable and run the script, as in:
 ```requestor$ GNPROVIDER=someprovidername python3 script.py```
 
 ## specific example
-suppose you want to watch the interaction of a request with a provider node (that you are running elsewhere as in a vm).
-let this provider node be named "jupiter-legacy". you can run **golemsp** on testnet with:
+you might then run **golemsp** on testnet (in a separate machine/vm) with:
 
 ```provider$ golemsp run --payment-network=rinkeby --subnet=devnet-beta```
+
+let this provider node be named "jupiter-legacy". 
 
 then, on the requestor side (defaulting to testnet), e.g. using the blender example, you can run:
 
 ```requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py```
+
+and see tasks (in the log) go only to jupiter-legacy!
 
 ### specific example with a twist
 it may be desirable to see how long it takes a file to upload to your provider.
