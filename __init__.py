@@ -20,7 +20,7 @@ class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS, object):
         provider_names = []
         score = SCORE_REJECTED
         
-        provider = os.environ.get('PROVIDER')
+        provider = os.environ.get('GNPROVIDER')
 
         if provider:
             provider_names.append(provider)
@@ -33,7 +33,8 @@ class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS, object):
 
         if score != SCORE_REJECTED:
             print(f'ACCEPTED offer from {offer.props["golem.node.id.name"]}', flush=True)
-            print(f'{offer.props}')
+            if len(provider_names) > 0:
+                print(f'\n{offer.props}\n')
         else:
             print(f'REJECTED offer from {offer.props["golem.node.id.name"]}', flush=True)
 
