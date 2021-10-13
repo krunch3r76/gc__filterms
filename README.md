@@ -12,7 +12,7 @@ add the following import statement to the py script that instantiates the Golem 
 
 when instantiating the Golem object, assign **filterProviderMS** to the the named parameter _strategy_:
 
-example:
+## script file setup
 ```
     async with Golem(
         budget=10.0,
@@ -23,30 +23,29 @@ example:
     ) as golem:
         #...
 ```
+## general example
+set the environment variable and run the script, as in:
 
-then set the environment variable and run the script, as in:
+```requestor$ GNPROVIDER=someprovidername python3 script.py```
 
-```$ GNPROVIDER=someprovidername python3 script.py```
-
-
+## specific example
 suppose you want to watch the interaction of a request with a provider node (that you are running elsewhere as in a vm).
-let this provider node be named "jupiter-legacy"
-on the machine running the provider node, you can run on testnet with:
+let this provider node be named "jupiter-legacy". then on the machine running the provider node, you can run on testnet with:
 
-```$ golemsp run --payment-network=rinkeby --subnet=devnet-beta```
+```provider$ golemsp run --payment-network=rinkeby --subnet=devnet-beta```
 
 then, on the requestor side, e.g. using the blender example, you can run:
 
-```$ GNPROVIDER=jupiter-legacy python3 ./blender.py```
+```requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py```
 
 it may be desirable to see how long it takes a file to upload to your provider.
 blender may be useful for this purpose. create a file of desired length, let's say, 100M, and use it instead of cubes.blend
 ```
-$ touch randomfile
-$ shred -n 1 -s 100M randomfile
-$ cp cubes.blend cubes.blend.bak
-$ ln -sf randomfile cubes.blend
-$ GNPROVIDER=jupiter-legacy python3 ./blender.py
+requestor$ touch randomfile
+requestor$ shred -n 1 -s 100M randomfile
+requestor$ cp cubes.blend cubes.blend.bak
+requestor$ ln -sf randomfile cubes.blend
+requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py
 ```
 
 ### comments
