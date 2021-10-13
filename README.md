@@ -2,6 +2,10 @@
 a package that provides a marketstrategy for whitelisting on golem
 
 # usage
+first clone the repo into your script directory
+
+```git clone git clone https://github.com/krunch3r76/filterms```
+
 add the following import statement to the py script that instantiates the Golem object
 `from filterms import filterProviderMS`
 
