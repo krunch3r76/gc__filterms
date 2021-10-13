@@ -4,13 +4,13 @@ a package that provides a marketstrategy for whitelisting on golem
 # usage
 first clone the repo into your script directory
 
-```git clone git clone https://github.com/krunch3r76/filterms```
+```$ git clone git clone https://github.com/krunch3r76/filterms```
 
 add the following import statement to the py script that instantiates the Golem object
 
 ```from filterms import filterProviderMS```
 
-when instantiating the Golem object, assign **filterProviderMS** to the the named property _strategy_:
+when instantiating the Golem object, assign **filterProviderMS** to the the named parameter _strategy_:
 
 example:
 ```
@@ -35,7 +35,9 @@ on the machine running the provider node, you can run on testnet with:
 
 ```$ golemsp run --payment-network=rinkeby --subnet=devnet-beta```
 
-then, on the machine running the requestor script, e.g. blender, you can run: ```GNPROVIDER=jupiter-legacy python3 ./blender.py```
+then, on the requestor side, e.g. using the blender example, you can run:
+
+```$ GNPROVIDER=jupiter-legacy python3 ./blender.py```
 
 it may be desirable to see how long it takes a file to upload to your provider.
 blender may be useful for this purpose. create a file of desired length, let's say, 100M, and use it instead of cubes.blend
