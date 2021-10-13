@@ -4,7 +4,7 @@ a package that provides a marketstrategy for whitelisting on golem
 watching requestor logs distribute 10 tasks asynchronously is fun. but you can have too much fun sometimes. if this rings true, i present to you the **filterms** python package (name finalization pending). it allows you to limit your requestor to only assign tasks to a specific provider then obsess over the details! can't wait? read on!
 
 # usage
-first clone the repo into your script directory
+first clone the repo directory into your script directory
 
 ```$ git clone https://github.com/krunch3r76/filterms```
 
