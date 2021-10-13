@@ -5,12 +5,7 @@ from typing import Optional
 from yapapi.strategy import SCORE_REJECTED, SCORE_NEUTRAL, SCORE_TRUSTED, ComputationHistory
 
 
-
-
-
-
-
-class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS, object):
+class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS):
 
     async def score_offer(
             self, offer: rest.market.OfferProposal, history: Optional[ComputationHistory] = None
