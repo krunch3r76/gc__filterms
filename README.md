@@ -7,7 +7,8 @@ first clone the repo into your script directory
 ```git clone git clone https://github.com/krunch3r76/filterms```
 
 add the following import statement to the py script that instantiates the Golem object
-`from filterms import filterProviderMS`
+
+```from filterms import filterProviderMS```
 
 when instantiating the Golem object, assign **filterProviderMS** to the the named property _strategy_:
 
