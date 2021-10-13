@@ -34,11 +34,11 @@ set the environment variable and run the script, as in:
 
 ## specific example
 suppose you want to watch the interaction of a request with a provider node (that you are running elsewhere as in a vm).
-let this provider node be named "jupiter-legacy". then on the machine running the provider node, you can run on testnet with:
+let this provider node be named "jupiter-legacy". you can run **golemsp** on testnet with:
 
 ```provider$ golemsp run --payment-network=rinkeby --subnet=devnet-beta```
 
-then, on the requestor side, e.g. using the blender example, you can run:
+then, on the requestor side (defaulting to testnet), e.g. using the blender example, you can run:
 
 ```requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py```
 
