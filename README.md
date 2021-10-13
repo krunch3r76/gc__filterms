@@ -45,6 +45,7 @@ $ shred -n 1 -s 100M randomfile
 $ cp cubes.blend cubes.blend.bak
 $ ln -sf randomfile cubes.blend
 $ GNPROVIDER=jupiter-legacy python3 ./blender.py
+```
 
 ### comments
 if you do not set the GNPROVIDER environment variable, the script passes the default LeastExpensiveLinearPayuMS to run as normal.
