@@ -2,8 +2,9 @@ import yapapi
 import os, sys # debug sys
 from yapapi import rest
 from typing import Optional
-from yapapi.strategy import SCORE_REJECTED, SCORE_NEUTRAL, SCORE_TRUSTED, ComputationHistory
+from yapapi.strategy import SCORE_REJECTED, SCORE_NEUTRAL, SCORE_TRUSTED, ComputationHistory, MarketStrategy
 import json
+
 
 def _convert_string_array_to_list(stringarray):
     """inputs 1) a stringarray bounded by [ ] with unquoted list elements and converts to a list of strings
@@ -44,7 +45,15 @@ def _convert_string_array_to_list(stringarray):
     return thelist if not error else []
 
 
-class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS):
+
+
+
+class FilterProviderMS(MarketStrategy):
+    def __init__(self, wrapped=None):
+        # make sure wrapped is a descendant of marketstrategy TODO
+        self._default=yapapi.strategy.LeastExpensiveLinearPayuMS()
+        self._wrapped=wrapped if wrapped else self._default
+
     async def score_offer(
             self, offer: rest.market.OfferProposal, history: Optional[ComputationHistory] = None
             ) -> float:
@@ -52,29 +61,34 @@ class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS):
         provider_names = []
         provider_names_bl = []
         score = SCORE_REJECTED
+        VERBOSE=os.environ.get('FILTERMSVERBOSE')
+
         try: 
             provider_names=_convert_string_array_to_list( os.environ.get('GNPROVIDER') )
             provider_names_bl=_convert_string_array_to_list( os.environ.get('GNPROVIDER_BL') )
-            # print(f"provider_names_bl: {provider_names_bl}") 
+
             # GNPROVIDER may be a bracketed expression implying a json array, otherwise a single value
 
             if len(provider_names_bl) > 0 and len(provider_names) > 0:
-                print(f"[filterProviderMS] ERROR, can have either a whitelist or blacklist but not both! Ignoring")
-                score=await super().score_offer(offer, history)
+                print(f"[filterProviderMS] ERROR, can have either a whitelist or blacklist but not both! Ignoring", file=sys.stderr)
+                score=await self._wrapped.score_offer(offer, history)
             elif len(provider_names_bl) > 0:
                 if offer.props["golem.node.id.name"] in provider_names_bl:
                     blacklisted=True
-                    print(f'REJECTED offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', flush=True)
+                    print(f'REJECTED offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', file=sys.stderr, flush=True)
+                else:
+                    score = await self._wrapped.score_offer(offer, history)
             elif len(provider_names) > 0:
                 if offer.props["golem.node.id.name"] in provider_names:
-                    score = await super().score_offer(offer, history)
+                    score = await self._wrapped.score_offer(offer, history)
                 if score != SCORE_REJECTED:
-                    print(f'ACCEPTED offer from {offer.props["golem.node.id.name"]}', flush=True)
-                    # print(f'\n{offer.props}\n')
+                    print(f'ACCEPTED offer from {offer.props["golem.node.id.name"]}', file=sys.stderr, flush=True)
+                    if VERBOSE:
+                        print(f'\n{offer.props}\n')
                 else:
-                    print(f'REJECTED offer from {offer.props["golem.node.id.name"]}', flush=True)
+                    print(f'REJECTED offer from {offer.props["golem.node.id.name"]}', file=sys.stderr, flush=True)
             else:
-                return await super().score_offer(offer, history)
+                score=await self._wrapped.score_offer(offer, history)
 
         except Exception as e:
             print("AN UNHANDLED EXCEPTION OCCURRED")
@@ -82,4 +96,11 @@ class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS):
 
         return score
 
-filterProviderMS = FilterProviderMS()
+    async def decorate_demand(self, demand):
+        return await self._wrapped.decorate_demand(demand)
+
+
+
+# deprecated, just instanstiate FilterProviderMS() as the named strategy argument on Golem
+# filterProviderMS = FilterProviderMS() # this is available for import as a default MarketStrategy object with filtering
+    # as a convenience
