@@ -1,5 +1,7 @@
 # filterms
-a package that provides a marketstrategy for whitelisting on golem
+a package that provides a marketstrategy for whitelisting or blacklisting on golem
+
+**now supports a list in the form of `[<providername>,<providername>]` to wl or bl multiple parties**
 
 watching requestor logs distribute 10 tasks asynchronously is fun. but you can have too much fun sometimes. if this rings true, i present to you the **filterms** python package (name finalization pending). it allows you to limit your requestor to only assign tasks to a specific provider then obsess over the details! can't wait? read on!
 
