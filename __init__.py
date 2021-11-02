@@ -55,7 +55,7 @@ class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS):
         try: 
             provider_names=_convert_string_array_to_list( os.environ.get('GNPROVIDER') )
             provider_names_bl=_convert_string_array_to_list( os.environ.get('GNPROVIDER_BL') )
-            print(f"provider_names_bl: {provider_names_bl}") 
+            # print(f"provider_names_bl: {provider_names_bl}") 
             # GNPROVIDER may be a bracketed expression implying a json array, otherwise a single value
 
             if len(provider_names_bl) > 0 and len(provider_names) > 0:
@@ -66,10 +66,7 @@ class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS):
                     blacklisted=True
                     print(f'REJECTED offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', flush=True)
             elif len(provider_names) > 0:
-                if len(provider_names) > 0:
-                    if offer.props["golem.node.id.name"] in provider_names:
-                        score = await super().score_offer(offer, history)
-                else:
+                if offer.props["golem.node.id.name"] in provider_names:
                     score = await super().score_offer(offer, history)
 
                 if len(provider_names) > 0:
@@ -78,6 +75,9 @@ class FilterProviderMS(yapapi.strategy.LeastExpensiveLinearPayuMS):
                         print(f'\n{offer.props}\n')
                     else:
                         print(f'REJECTED offer from {offer.props["golem.node.id.name"]}', flush=True)
+            else:
+                return await super().score_offer(offer, history)
+
         except Exception as e:
             print("AN UNHANDLED EXCEPTION OCCURRED")
             print(e)
