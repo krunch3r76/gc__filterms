@@ -1,4 +1,4 @@
-# gc_filterms
+# gc__filterms
 a package that provides a marketstrategy for whitelisting or blacklisting on golem
 
 **now supports a list in the form of `[<providername>,<providername>]` to wl or bl multiple parties**
