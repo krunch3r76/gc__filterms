@@ -8,7 +8,7 @@ gc__filterms solves the problem of seeing tasks go to providers that are not per
 # usage
 first clone the repo directory into your script directory
 
-`$ git clone https://github.com/krunch3r76/filterms`
+`$ git clone https://github.com/krunch3r76/gc__filterms`
 
 
 ## script file setup
