@@ -15,7 +15,7 @@ first clone the repo directory into your script directory
 
 add the following import statement to the py script that instantiates the Golem object
 
-`from filterms import FilterProviderMS`
+`from gc__filterms import FilterProviderMS`
 
 when instantiating the Golem object, assign **FilterProviderMS** to the the named parameter _strategy_:
 
