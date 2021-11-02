@@ -61,17 +61,6 @@ then, on the requestor side (defaulting to testnet), e.g. using the blender exam
 
 and see tasks (in the log) go only to jupiter-legacy!
 
-### specific example with a twist
-it may be desirable to see how long it takes a file to upload to your provider.
-blender may be useful for this purpose. create a file of desired length, let's say, 100M, and use it instead of cubes.blend
-```bash
-requestor$ touch randomfile
-requestor$ shred -n 1 -s 100M randomfile
-requestor$ cp cubes.blend cubes.blend.bak
-requestor$ ln -sf randomfile cubes.blend
-requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py
-```
-
 ### wrap an existing strategy
 ```python
 import yapapi
