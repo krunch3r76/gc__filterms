@@ -55,7 +55,7 @@ you might then run **golemsp** on testnet (in a separate machine/vm) with:
 
 let this provider node be named "jupiter-legacy". 
 
-then, on the requestor side (assuming Golem constructed with payment_network='rinkeby',  subnet_ag='devnet-beta'), e.g. using the blender example, you can run:
+then, on the requestor side (assuming Golem constructed with payment_network='rinkeby',  subnet_tag='devnet-beta'), e.g. using the blender example, you can run:
 
 `requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py`
 
