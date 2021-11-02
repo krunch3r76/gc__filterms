@@ -32,7 +32,7 @@ set the environment variable and run the script, as in:
 
 ```requestor$ GNPROVIDER=someprovidername python3 script.py```
 
-## specific example
+## specific examples
 you might then run **golemsp** on testnet (in a separate machine/vm) with:
 
 ```provider$ golemsp run --payment-network=rinkeby --subnet=devnet-beta```
@@ -44,6 +44,15 @@ then, on the requestor side (defaulting to testnet), e.g. using the blender exam
 ```requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py```
 
 and see tasks (in the log) go only to jupiter-legacy!
+
+### multiple providers
+```requestor$ GNPROVIDER=[qbam,etam] ./ssh.py```
+NOTE: note that i did not quote the assignment of the bash variable. this is the most direct way of listing.
+
+### blacklisting
+set the GNPROVIDER_BL environment variable, for example
+```requestor$ GNPROVIDER_BL=[qbam,etam] ./ssh.py```
+
 
 ### specific example with a twist
 it may be desirable to see how long it takes a file to upload to your provider.
