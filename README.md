@@ -8,7 +8,7 @@ watching requestor logs distribute 10 tasks asynchronously is fun. but you can h
 # usage
 first clone the repo directory into your script directory
 
-```$ git clone https://github.com/krunch3r76/filterms```
+`$ git clone https://github.com/krunch3r76/filterms`
 
 
 ## script file setup
@@ -29,10 +29,14 @@ async with Golem(
     ) as golem:
         #...
 ```
-## general example
+## quickstart overview
 set the environment variable and run the script, as in:
-
-`requestor$ GNPROVIDER=someprovidername python3 script.py`
+```bash
+requestor$ GNPROVIDER=bristlecone python3 script.py
+requestor$ GNPROVIDER=[azathoth-rnd,mf] python3 script.py
+requestor$ GNPROVIDER_BL=[rustedrobbie,psychocalvin,sycamore] python3 script.py
+#etc
+```
 
 ## specific examples
 
