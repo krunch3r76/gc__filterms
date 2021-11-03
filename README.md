@@ -1,5 +1,5 @@
 # gc__filterms
-a package that provides a marketstrategy for whitelisting or blacklisting on Golem
+a package that facilitates whitelisting or blacklisting on Golem from the command line
 
 _**learn how Golem is changing the status quo, a thousand processors at a time! visit https://www.golem.network**_
 
