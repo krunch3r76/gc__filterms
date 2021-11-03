@@ -1,7 +1,7 @@
 # gc__filterms
-a package that provides a marketstrategy for whitelisting or blacklisting on golem
+a package that provides a marketstrategy for whitelisting or blacklisting on Golem
 
-**now supports a list in the form of `[<providername>,<providername>]` to wl or bl multiple parties**
+_**learn how Golem is changing the status quo, a thousand processors at a time! visit https://www.golem.network**_
 
 gc__filterms solves the problem of seeing tasks go to providers that are not performing or behaving well. it is a tool to empower the requestor to avoid (or select) providers of interest. specifically, it augments any current strategy the requestor script has designed by checking offers against criteria to filter for or against, currently filtering only on provider names.
 
@@ -42,7 +42,7 @@ requestor$ GNPROVIDER_BL=[rustedrobbie,psychocalvin,sycamore] python3 script.py
 
 ### multiple providers
 `requestor$ GNPROVIDER=[qbam,etam] ./ssh.py`
-NOTE: note that i did not quote the assignment of the bash variable. this is the most direct way of listing.
+NOTE: note that i did not quote the assignment of the bash variable (and there are no spaces!). this is the most direct way of listing.
 
 ### blacklisting
 set the GNPROVIDER_BL environment variable, for example
