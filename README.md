@@ -17,7 +17,7 @@ add the following import statement to the py script that instantiates the Golem 
 
 `from gc__filterms import FilterProviderMS`
 
-when instantiating the Golem object, assign **FilterProviderMS** to the the named parameter _strategy_:
+when instantiating the Golem object, assign a **FilterProviderMS** object (in-place ok) to the the named parameter _strategy_:
 
 ```python
 async with Golem(
