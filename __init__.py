@@ -70,29 +70,29 @@ class FilterProviderMS(MarketStrategy):
             # GNPROVIDER may be a bracketed expression implying a json array, otherwise a single value
 
             if len(provider_names_bl) > 0 and len(provider_names) > 0:
-                print(f"[filterProviderMS] ERROR, can have either a whitelist or blacklist but not both! Ignoring", file=sys.stderr)
+                print(f"[filterms] ERROR, can have either a whitelist or blacklist but not both! Ignoring", file=sys.stderr)
                 score=await self._wrapped.score_offer(offer, history)
             elif len(provider_names_bl) > 0: # blacklisting
                 if offer.props["golem.node.id.name"] in provider_names_bl:
                     blacklisted=True
-                    print(f'\033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', file=sys.stderr, flush=True)
+                    print(f'[filterms] \033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', file=sys.stderr, flush=True)
                 else:
                     score = await self._wrapped.score_offer(offer, history)
             elif len(provider_names) > 0: # whitelisting
                 if offer.props["golem.node.id.name"] in provider_names:
                     score = await self._wrapped.score_offer(offer, history)
                 if score != SCORE_REJECTED:
-                    print(f'ACCEPTED offer from {offer.props["golem.node.id.name"]}', file=sys.stderr, flush=True)
+                    print(f'[filterms] ACCEPTED offer from {offer.props["golem.node.id.name"]}', file=sys.stderr, flush=True)
                     if VERBOSE:
                         print(f'\n{offer.props}\n')
                 else:
-                    print(f'\033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, who was whitelisted!', file=sys.stderr, flush=True)
+                    print(f'[filterms] \033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, who was whitelisted!', file=sys.stderr, flush=True)
             else:
                 score=await self._wrapped.score_offer(offer, history)
 
         except Exception as e:
-            print("AN UNHANDLED EXCEPTION OCCURRED")
-            print(e)
+            print("[filterms] AN UNHANDLED EXCEPTION OCCURRED")
+            # print(e)
 
         return score
 
