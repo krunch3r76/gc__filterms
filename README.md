@@ -116,6 +116,7 @@ consider branching your app to a specific branch with filterms as by
 <filtered_branch> $ git merge main
 <filtered_branch:caught up with main> $ GNPROVIDER=rustedrobbie requestor.py
 ```
+you might thenscript some logic to check for filterms and use it if its available
 
 # comments
 if you do not set the GNPROVIDER environment variable, the script passes the default LeastExpensiveLinearPayuMS to run as normal.
