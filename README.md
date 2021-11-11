@@ -103,6 +103,20 @@ from decimal import Decimal
 	#...
 ```
 
+# usage tips
+consider branching your app to a specific branch with filterms as by
+```bash
+# once only
+<main> $ git checkout -b filtered_branch
+<filtered_branch> $ git clone https://github.com/krunch3r76/gc__filterms
+<filtered_branch> $ git commit -a -m "first commit"
+
+# subsequently
+<main> $ git checkout filtered_branch
+<filtered_branch> $ git merge main
+<filtered_branch:caught up with main> $ GNPROVIDER=rustedrobbie requestor.py
+```
+
 # comments
 if you do not set the GNPROVIDER environment variable, the script passes the default LeastExpensiveLinearPayuMS to run as normal.
 ref: https://github.com/golemfactory/yapapi/blob/0.7.0/yapapi/engine.py#L134
