@@ -45,8 +45,15 @@ def _convert_string_array_to_list(stringarray):
     return thelist if not error else []
 
 
-
-
+def _find_first_address_field(props):
+    first_address_field = None
+    for field in props.keys():
+        if field.endswith(".address"):
+            first_address_field=field
+            break
+    if not first_address_field:
+        raise 'offer did not contain any addressing information'
+    return first_address_field
 
 class FilterProviderMS(MarketStrategy):
     def __init__(self, wrapped=None):
@@ -62,13 +69,12 @@ class FilterProviderMS(MarketStrategy):
         provider_names_bl = []
         score = SCORE_REJECTED
         VERBOSE=os.environ.get('FILTERMSVERBOSE')
-
+        address_fieldname=_find_first_address_field(offer.props)
         try: 
             provider_names=_convert_string_array_to_list( os.environ.get('GNPROVIDER') )
             provider_names_bl=_convert_string_array_to_list( os.environ.get('GNPROVIDER_BL') )
 
             # GNPROVIDER may be a bracketed expression implying a json array, otherwise a single value FUTURE IMPLEMENTATION
-
             if len(provider_names_bl) > 0 and len(provider_names) > 0:
                 print(f"[filterms] ERROR, can have either a whitelist or blacklist but not both! Ignoring", file=sys.stderr)
                 score=await self._wrapped.score_offer(offer, history)
@@ -76,30 +82,16 @@ class FilterProviderMS(MarketStrategy):
                 if offer.props["golem.node.id.name"] in provider_names_bl:
                     blacklisted=True
                     print(f'[filterms] \033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', file=sys.stderr, flush=True)
-                elif 'golem.com.payment.platform.erc20-mainnet-glm.address' in offer.props:
-                    if offer.props["golem.com.payment.platform.erc20-mainnet-glm.address"] in provider_names_bl:
-                        blacklisted=True
-                        print(f'[filterms] \033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', file=sys.stderr, flush=True)
-                    else:
-                        score = await self._wrapped.score_offer(offer, history)
-                elif 'golem.com.payment.platform.erc20-rinkeby-tglm.address' in offer.props:
-                    if offer.props['golem.com.payment.platform.erc20-rinkeby-tglm.address'] in provider_names_bl:
-                        blacklisted=True
-                        print(f'[filterms] \033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', file=sys.stderr, flush=True)
-                    else:
-                        score = await self._wrapped.score_offer(offer, history)
-                else:
+                elif offer.props[address_fieldname] in provider_names_bl:
+                    blacklisted=True
+                    print(f'[filterms] \033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', file=sys.stderr, flush=True)
+                if not blacklisted:
                     score = await self._wrapped.score_offer(offer, history)
             elif len(provider_names) > 0: # whitelisting
                 if offer.props["golem.node.id.name"] in provider_names:
                     score = await self._wrapped.score_offer(offer, history)
-                elif 'golem.com.payment.platform.erc20-mainnet-glm.address' in offer.props:
-                    if offer.props["golem.com.payment.platform.erc20-mainnet-glm.address"] in provider_names:
-                        score = await self._wrapped.score_offer(offer, history)
-                elif 'golem.com.payment.platform.erc20-rinkeby-tglm.address' in offer.props:
-                    if offer.props['golem.com.payment.platform.erc20-rinkeby-tglm.address'] in provider_names:
-                        score = await self._wrapped.score_offer(offer, history)
-
+                if offer.props[address_fieldname] in provider_names:
+                    score = await self._wrapped.score_offer(offer, history)
                 if score != SCORE_REJECTED:
                     print(f'[filterms] ACCEPTED offer from {offer.props["golem.node.id.name"]}', file=sys.stderr, flush=True)
                     if VERBOSE:
@@ -107,7 +99,6 @@ class FilterProviderMS(MarketStrategy):
                 else:
                     print(f'[filterms] \033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, reason: not whitelisted!', file=sys.stderr, flush=True)
             else:
-                print("SCORING")
                 score=await self._wrapped.score_offer(offer, history)
 
         except Exception as e:
