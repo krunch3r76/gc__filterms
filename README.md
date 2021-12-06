@@ -35,6 +35,9 @@ set the environment variable and run the script, as in:
 requestor$ GNPROVIDER=bristlecone python3 script.py
 requestor$ GNPROVIDER=[azathoth-rnd,mf] python3 script.py
 requestor$ GNPROVIDER_BL=[rustedrobbie,psychocalvin,sycamore] python3 script.py
+# or export first, notice addresses are permitted
+requestor$ export GNPROVIDER_BL=[0x4316e60d7154a99b16d4cd43202017983cdb6bcb,0x65df9b7ae0face09abd6d3ac83203e797db8d5c3,0xb6abad331066fbc6ba2012b85a14fd2c288ee3d9,sycamore]
+requestor$ python3 script.py
 #etc
 ```
 
