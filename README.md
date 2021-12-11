@@ -40,6 +40,7 @@ requestor$ export GNPROVIDER_BL=[0x4316e60d7154a99b16d4cd43202017983cdb6bcb,0x65
 requestor$ python3 script.py
 #etc
 ```
+### note: when filtering by address, filtering is against the node address, not the wallet address
 
 ## specific examples
 
