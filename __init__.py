@@ -44,8 +44,12 @@ def _convert_string_array_to_list(stringarray):
 
     return thelist if not error else []
 
-
-
+def _partial_match_in(cf, node_addresses):
+    for node_address in node_addresses:
+        if cf.startswith(node_address):
+            return True
+    return False
+        
 class FilterProviderMS(MarketStrategy):
     def __init__(self, wrapped=None):
         # make sure wrapped is a descendant of marketstrategy TODO
@@ -72,7 +76,8 @@ class FilterProviderMS(MarketStrategy):
                 if offer.props["golem.node.id.name"] in provider_names_bl:
                     blacklisted=True
                     print(f'[filterms] \033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', file=sys.stderr, flush=True)
-                elif offer.issuer in provider_names_bl:
+                elif _partial_match_in(offer.issuer, provider_names_bl):
+#                elif offer.issuer in provider_names_bl:
                     blacklisted=True
                     print(f'[filterms] \033[5mREJECTED\033[0m offer from {offer.props["golem.node.id.name"]}, reason: blacklisted!', file=sys.stderr, flush=True)
                 if not blacklisted:
@@ -80,7 +85,8 @@ class FilterProviderMS(MarketStrategy):
             elif len(provider_names) > 0: # whitelisting
                 if offer.props["golem.node.id.name"] in provider_names:
                     score = await self._wrapped.score_offer(offer, history)
-                elif offer.issuer in provider_names:
+                elif _partial_match_in(offer.issuer, provider_names):
+#                elif offer.issuer in provider_names:
                     score = await self._wrapped.score_offer(offer, history)
                 if score != SCORE_REJECTED:
                     print(f'[filterms] ACCEPTED offer from {offer.props["golem.node.id.name"]}', file=sys.stderr, flush=True)
