@@ -3,7 +3,7 @@ a package that facilitates whitelisting or blacklisting on Golem from the comman
 
 _**learn how Golem is changing the status quo, a thousand processors at a time! visit https://www.golem.network**_
 
-gc__filterms solves the problem of seeing tasks go to providers that are not performing or behaving well. it is a tool to empower the requestor to avoid (or select) providers of interest. specifically, it augments any current strategy the requestor script has designed by checking offers against criteria to filter for or against, currently filtering only on provider names.
+gc__filterms solves the problem of seeing tasks go to providers that are not performing or behaving well. it is a tool to empower the requestor to avoid (or select) providers of interest. specifically, it augments any current strategy the requestor script has designed by checking offers against criteria to filter for or against, currently filtering only on provider names and node addresses (partial ok).
 
 # usage
 first clone the repo directory into your script directory
