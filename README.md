@@ -139,7 +139,7 @@ else:
 ```
 ## create a symlink to the directory with the filterms repo
 ```bash
-(in directory of project)$ ln -s <directory of filtermsrepo> gc__filterms
+(in directory of project)$ ln -s <path to gc__filterms repo dir> gc__filterms
 ```
 
 # comments
