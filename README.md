@@ -124,7 +124,7 @@ else:
                 strategy=FilterProviderMS(self.strat)
             else:
                 strategy=self.strat
-
+# ...
             ############################################################################\
             # initialize and spread work across task objects                            #
             async with yapapi.Golem(
