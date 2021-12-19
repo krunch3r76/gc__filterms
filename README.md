@@ -55,15 +55,15 @@ set the GNPROVIDER_BL environment variable, for example
 ### a specific example for testing
 you might then run **golemsp** on testnet (in a separate machine/vm) with:
 
-`provider$ golemsp run --payment-network=rinkeby --subnet=devnet-beta`
+`provider$ golemsp run --payment-network=testnet --subnet=devnet-beta`
 
 let this provider node be named "jupiter-legacy". 
 
-then, on the requestor side (assuming Golem constructed with payment_network='rinkeby',  subnet_tag='devnet-beta'), e.g. using the blender example, you can run:
+then, on the requestor side (assuming Golem constructed with payment_network='testnet',  subnet_tag='devnet-beta'), e.g. using the blender example, you can run:
 
 `requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py`
 
-and see tasks (in the log) go only to jupiter-legacy!
+and see tasks (in the log) go only to jupiter-legacy (on devnet-beta)!
 
 ### wrap an existing strategy
 ```python
