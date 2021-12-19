@@ -108,19 +108,39 @@ from decimal import Decimal
 ```
 
 # usage tips
-consider branching your app to a specific branch with filterms as by
-```bash
-# once only
-<main> $ git checkout -b filtered_branch
-<filtered_branch> $ git clone https://github.com/krunch3r76/gc__filterms
-<filtered_branch> $ git commit -a -m "first commit"
+## conditional import
+```python
+try:
+    moduleFilterProviderMS=False
+    from gc__filterms import FilterProviderMS
+except ModuleNotFoundError:
+    pass
+else:
+    moduleFilterProviderMS=True
+    
+#...
 
-# subsequently
-<main> $ git checkout filtered_branch
-<filtered_branch> $ git merge main
-<filtered_branch:caught up with main> $ GNPROVIDER=rustedrobbie requestor.py
+ if moduleFilterProviderMS:
+                strategy=FilterProviderMS(self.strat)
+            else:
+                strategy=self.strat
+
+            ############################################################################\
+            # initialize and spread work across task objects                            #
+            async with yapapi.Golem(
+                    budget=self.BUDGET-self._costRunning
+                    , subnet_tag=self.args.subnet_tag
+                    , payment_network=self.args.payment_network
+                    , payment_driver=self.args.payment_driver
+                    , event_consumer=MySummaryLogger(self).log
+                    , strategy=strategy
+            ) as golem:
+	    #...
 ```
-+/- you might then script some logic to check for filterms and use it if it's available
+## create a symlink to the directory with the filterms repo
+```bash
+(in directory of project)$ ln -s <directory of filtermsrepo> gc__filterms
+```
 
 # comments
 if you do not set the GNPROVIDER environment variable, the script passes the default LeastExpensiveLinearPayuMS to run as normal.
