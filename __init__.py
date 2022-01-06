@@ -77,7 +77,7 @@ class FilterProviderMS(MarketStrategy):
         blacklisted=False
         provider_names = []
         provider_names_bl = []
-        score = SCORE_REJECTED
+        score = None
         name = offer.props["golem.node.id.name"]
 
 
@@ -86,36 +86,38 @@ class FilterProviderMS(MarketStrategy):
             provider_names_bl=_convert_string_array_to_list( os.environ.get('GNPROVIDER_BL') )
 
             # GNPROVIDER may be a bracketed expression implying a json array, otherwise a single value FUTURE IMPLEMENTATION
-            if len(provider_names_bl) > 0 and len(provider_names) > 0:
-                print(f"[filterms] ERROR, can have either a whitelist or blacklist but not both! Ignoring", file=sys.stderr)
-                score=await self._wrapped.score_offer(offer, history)
-            elif len(provider_names_bl) > 0: # blacklisting
+            if len(provider_names_bl) > 0: # blacklisting
                 if name in provider_names_bl: # match name
                     blacklisted=True
-                    if VERBOSE and name not in seen_rejected: # prince once when verbose
+                    if name not in seen_rejected: # prince once when verbose
                         print(f'[filterms] \033[5mREJECTED\033[0m offer from {name}, reason: blacklisted!', file=sys.stderr, flush=True)
                     seen_rejected.add(name)
                 elif _partial_match_in(offer.issuer, provider_names_bl): # partial match node address
                     blacklisted=True
-                    if VERBOSE and name not in seen_rejected: # print once when verbose
+                    if name not in seen_rejected: # print once when verbose
                         print(f'[filterms] \033[5mREJECTED\033[0m offer from {name}, reason: blacklisted!', file=sys.stderr, flush=True)
                     seen_rejected.add(name)
-                if not blacklisted:
-                    score = await self._wrapped.score_offer(offer, history)
-            elif len(provider_names) > 0: # whitelisting
+                if blacklisted:
+                    score = SCORE_REJECTED
+
+            if not blacklisted and len(provider_names) > 0: # whitelisting
                 if name in provider_names: # match name
                     score = await self._wrapped.score_offer(offer, history)
                 elif _partial_match_in(offer.issuer, provider_names): # partial match node address
                     score = await self._wrapped.score_offer(offer, history)
-                if score != SCORE_REJECTED:
-                    print(f'[filterms] ACCEPTED offer from {name}', file=sys.stderr, flush=True)
+                else:
+                    score = SCORE_REJECTED
+
+                if score != SCORE_REJECTED and score != None:
+                    print(f'[filterms] ACCEPTED offer from {name} scored at: {score}', file=sys.stderr, flush=True)
                     if VERBOSE:
                         print(f'\n{offer.props}\n')
                 else:
                     if VERBOSE and name not in seen_rejected: # print once when verbose
                         print(f'[filterms] \033[5mREJECTED\033[0m offer from {name}, reason: not whitelisted!', file=sys.stderr, flush=True)
                     seen_rejected.add(name)
-            else: # neither environment var set, just fallback to call wrapped score_offer
+
+            if score==None:
                 score=await self._wrapped.score_offer(offer, history)
 
         except Exception as e:
