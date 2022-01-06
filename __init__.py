@@ -44,12 +44,17 @@ def _convert_string_array_to_list(stringarray):
 
     return thelist if not error else []
 
+
+
+
 def _partial_match_in(cf, node_addresses):
     for node_address in node_addresses:
         if cf.startswith(node_address):
             return True
     return False
-        
+
+
+
 class FilterProviderMS(MarketStrategy):
     def __init__(self, wrapped=None):
         # make sure wrapped is a descendant of marketstrategy TODO
