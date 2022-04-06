@@ -2,7 +2,7 @@ import yapapi
 import os, sys # debug sys
 from yapapi import rest
 from typing import Optional
-from yapapi.strategy import SCORE_REJECTED, SCORE_NEUTRAL, SCORE_TRUSTED, MarketStrategy, DecreaseScoreForUnconfirmedAgreement, LeastExpensiveLinearPayuMS
+from yapapi.strategy import SCORE_REJECTED, SCORE_NEUTRAL, SCORE_TRUSTED, MarketStrategy, DecreaseScoreForUnconfirmedAgreement, LeastExpensiveLinearPayuMS, WrappingMarketStrategy
 from yapapi.props import com
 from decimal import Decimal
 import json
@@ -68,7 +68,7 @@ def _partial_match_in(cf, node_addresses):
 
 
 
-class FilterProviderMS(MarketStrategy):
+class FilterProviderMS(WrappingMarketStrategy):
     def __init__(self, wrapped=None, ansi=True):
         # make sure wrapped is a descendant of marketstrategy TODO
         self._default=_initialize_default_strategy()
@@ -76,11 +76,13 @@ class FilterProviderMS(MarketStrategy):
         self._seen_rejected = set()
         self._motd = False
         self._VERBOSE=os.environ.get('FILTERMSVERBOSE')
+        super().__init__(self._wrapped)
 
         if not self._motd:
             if not self._VERBOSE:
                 print(f"[filterms] TO SEE ALL REJECTIONS SET THE ENVIRONMENT VARIABLE FILTERMSVERBOSE TO 1", file=sys.stderr)
             self._motd=True
+
 
     async def score_offer(self, offer) -> float:
         seen_rejected=self._seen_rejected
@@ -113,9 +115,9 @@ class FilterProviderMS(MarketStrategy):
 
             if not blacklisted and len(provider_names) > 0: # whitelisting
                 if name in provider_names: # match name
-                    score = await self._wrapped.score_offer(offer)
+                    score = await self.base_strategy.score_offer(offer)
                 elif _partial_match_in(offer.issuer, provider_names): # partial match node address
-                    score = await self._wrapped.score_offer(offer)
+                    score = await self.base_strategy.score_offer(offer)
                 else:
                     score = SCORE_REJECTED
 
@@ -128,17 +130,15 @@ class FilterProviderMS(MarketStrategy):
                         print(f'[filterms] \033[5mREJECTED\033[0m offer from {name}, reason: not whitelisted!', file=sys.stderr, flush=True)
                     seen_rejected.add(name)
 
+
             if score==None:
-                score=await self._wrapped.score_offer(offer)
+                score=await self.base_strategy.score_offer(offer)
 
         except Exception as e:
             print("[filterms] AN UNHANDLED EXCEPTION OCCURRED", file=sys.stderr)
             print(e, file=sys.stderr)
 
         return score
-
-    async def decorate_demand(self, demand):
-        return await self._wrapped.decorate_demand(demand)
 
 
 
