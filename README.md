@@ -1,3 +1,5 @@
+# filterms is being revised for integration / interop with the latest yapapi 0.9. thank you for your patience.
+
 # gc__filterms
 a package that facilitates whitelisting or blacklisting on Golem from the command line
 
