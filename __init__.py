@@ -1,144 +1,335 @@
+# filterms.py
+# authored by krunch3r76 (https://www.github.com/krunch3r76)
+# license GPL 3.0
+
 import yapapi
-import os, sys # debug sys
+import os, sys  # debug sys
 from yapapi import rest
 from typing import Optional
-from yapapi.strategy import SCORE_REJECTED, SCORE_NEUTRAL, SCORE_TRUSTED, MarketStrategy, DecreaseScoreForUnconfirmedAgreement, LeastExpensiveLinearPayuMS, WrappingMarketStrategy
+from yapapi.strategy import (
+    SCORE_REJECTED,
+    SCORE_NEUTRAL,
+    SCORE_TRUSTED,
+    MarketStrategy,
+    DecreaseScoreForUnconfirmedAgreement,
+    LeastExpensiveLinearPayuMS,
+    WrappingMarketStrategy,
+)
 from yapapi.props import com
 from decimal import Decimal
 import json
+from .provider_filter import ProviderFilter
+import inspect
+
+import logging
+from collections.abc import Iterable
+
+
+def _print_err(*args, **kwargs):
+
+    """wrapper around print to route to stderr"""
+    kwargs["file"] = sys.stderr
+    print(*args, **kwargs)
+
 
 # originally a method from yapapi.golem::Golem (yapapi 0.9)
+# creates sane defaults for a marketstrategy
 def _initialize_default_strategy() -> DecreaseScoreForUnconfirmedAgreement:
 
     """Create a default strategy and register it's event consumer"""
     base_strategy = LeastExpensiveLinearPayuMS(
-            max_fixed_price=Decimal("1.0"),
-            max_price_for={com.Counter.CPU: Decimal("0.2"), com.Counter.TIME: Decimal("0.1")},
-            )
+        max_fixed_price=Decimal("1.0"),
+        max_price_for={
+            com.Counter.CPU: Decimal("0.2"),
+            com.Counter.TIME: Decimal("0.1"),
+        },
+    )
     strategy = DecreaseScoreForUnconfirmedAgreement(base_strategy, 0.5)
     # self._event_consumers.append(strategy.on_event)
     return strategy
 
-def _convert_string_array_to_list(stringarray):
-    """inputs 1) a stringarray bounded by [ ] with unquoted list elements and converts to a list of strings
-    or 2) an unbounded string that is a single word which is placed as a string in a list
-    then returns the list or an empty list
-    """
-    error = False
-    done = False
-    thelist=[]
 
-    if not isinstance(stringarray, str):
-        error=True
+class _ProviderInfo:
 
+    """store name@provider_id as hashable along with other relevant offer info"""
 
-    if not error and not done:
-        if len(stringarray) == 0:
-            error=True
+    def __init__(self, name, provider_id, cpu_capabilities):
+        self.__name = name
+        self.__provider_id = provider_id
+        self.__cpu_capabilities = cpu_capabilities
 
-    if not error and not done:
-        if stringarray[0]!='[':
-            thelist.append(stringarray)
-            done = True
+    @property
+    def name(self):
+        return self.__name
 
-    if not error and not done:
-        if len(stringarray) < 3:
-            error=True # a input bracketed string must have at least one element (character) to listify
+    @property
+    def provider_id(self):
+        return self.__provider_id
 
-    if not error and not done: # not done implies begins with '['
-        if (stringarray[-1]==']'):
-            thelist.append(stringarray)
-        else:
-            error=True
+    @property
+    def cpu_capabilities(self):
+        return self.__cpu_capabilities
 
-    if not error and not done:
-        thelist=stringarray[1:-1].split(',')
-
-
-    return thelist if not error else []
-
-
-
-
-def _partial_match_in(cf, node_addresses):
-    for node_address in node_addresses:
-        if cf.startswith(node_address):
+    def check_cpu_capabilities(self, features):
+        """ensure all capabilities are present on the offer"""
+        assert isinstance(features, Iterable)
+        if len(features) == 0:
             return True
-    return False
+        return all(map(lambda feature: feature in self.cpu_capabilities, features))
+
+    def __repr__(self):
+        return f"{self.name}@{self.provider_id}"
+
+    def __hash__(self):
+        return hash(repr(self))
+
+    def __eq__(self, other):
+        return self.__hash__() == other.__hash__()
+
+    def fuzzy_matches(self, name_or_partial_id):
+        """determine if either name or partial address corresponds to internals"""
+        whether_name_matches = False
+        whether_partial_id_matches = False
+
+        if name_or_partial_id == self.name:
+            whether_name_matches = True
+        if self.provider_id.startswith(name_or_partial_id):
+            whether_partial_id_matches = True
+
+        return whether_name_matches ^ whether_partial_id_matches
 
 
+class FilterProviderMS(ProviderFilter):
+    """
+    :_VERBOSE               verbose logging (determined by presence of env:FILTERMSVERBOSE
+    :_previously_rejected   a set of previously rejected providers
+    :_seen_providers        a set of all unique providers seen thus far
 
-class FilterProviderMS(WrappingMarketStrategy):
-    def __init__(self, wrapped=None, ansi=True):
-        # make sure wrapped is a descendant of marketstrategy TODO
-        self._default=_initialize_default_strategy()
-        self._wrapped=wrapped if wrapped != None else self._default
-        self._seen_rejected = set()
-        self._motd = False
-        self._VERBOSE=os.environ.get('FILTERMSVERBOSE')
-        super().__init__(self._wrapped)
+    """
 
-        if not self._motd:
+    #               __init__                                                 <
+    def __init__(self, base_strategy=None, features=None):
+
+        # -          _convert_string_array_to_list                          -<
+        def _convert_string_array_to_list(stringarray):
+
+            """take a string that represents a single value or a bracketed array
+            and return enclosed in a python list
+
+            inputs 1) a stringarray bounded by [ ] with unquoted list elements and
+            converts to a list of strings
+            or 2) an unbounded string that is a single word which is placed as a string in a list
+            then returns the list or an empty list
+            """
+
+            error = False
+            done = False
+            thelist = []
+
+            if stringarray == None:
+                error = True
+
+            if not error and not isinstance(stringarray, str):
+                error = True
+
+            if not error and not done:
+                if len(stringarray) == 0:
+                    error = True
+
+            if not error and not done:
+                if stringarray[0] != "[":
+                    thelist.append(stringarray)
+                    done = True
+
+            if not error and not done:
+                if len(stringarray) < 3:
+                    error = True  # a input bracketed string must have at least one element (character) to listify
+
+            if not error and not done:  # not done implies begins with '['
+                if stringarray[-1] == "]":
+                    thelist.append(stringarray)
+                else:
+                    error = True
+
+            if not error and not done:
+                thelist = stringarray[1:-1].split(",")
+
+            return thelist if not error else []
+
+        # /-          _convert_string_array_to_list                          ->
+
+        def setup_logger(self):
+            self._logger = logging.getLogger("filterms")
+            stream_handler = logging.StreamHandler(sys.stderr)
+            formatter = logging.Formatter("[filterms] %(levelname)s - %(message)s")
+            stream_handler.setFormatter(formatter)
+            self._logger.addHandler(stream_handler)
+            self._logger.setLevel(logging.INFO)
+            if self._VERBOSE:
+                self._logger.setLevel(logging.DEBUG)
             if not self._VERBOSE:
-                print(f"[filterms] TO SEE ALL REJECTIONS SET THE ENVIRONMENT VARIABLE FILTERMSVERBOSE TO 1", file=sys.stderr)
-            self._motd=True
+                self._logger.info(
+                    f"TO SEE ALL REJECTIONS SET THE ENVIRONMENT VARIABLE FILTERMSVERBOSE TO 1",
+                )
 
+        self._VERBOSE = os.environ.get("FILTERMSVERBOSE")
 
-    async def score_offer(self, offer) -> float:
-        seen_rejected=self._seen_rejected
-        VERBOSE=self._VERBOSE
-        blacklisted=False
-        provider_names = []
-        provider_names_bl = []
-        score = None
-        name = offer.props["golem.node.id.name"]
+        self._provider_fuzzy_bl = _convert_string_array_to_list(
+            os.environ.get("GNPROVIDER_BL")
+        )
 
+        self._provider_fuzzy_wl = _convert_string_array_to_list(
+            os.environ.get("GNPROVIDER")
+        )
+        setup_logger(self)
+        self._logger.debug(f"fuzzy whitelist is {self._provider_fuzzy_wl}")
+        if features == None:
+            features = _convert_string_array_to_list(os.environ.get("GNFEATURES"))
+        elif isinstance(features, str):
+            features = [features]
+        elif not isinstance(features, Iterable):
+            self._logger.warning(
+                "Features argument is neither a string nor an iterable: IGNORED!"
+            )
+            features = list()
+        self._features = features
 
-        try: 
-            provider_names=_convert_string_array_to_list( os.environ.get('GNPROVIDER') )
-            provider_names_bl=_convert_string_array_to_list( os.environ.get('GNPROVIDER_BL') )
+        if base_strategy == None:
+            base_strategy = initialize_default_strategy()
+        super().__init__(base_strategy, is_allowed=self._is_allowed)
 
-            # GNPROVIDER may be a bracketed expression implying a json array, otherwise a single value FUTURE IMPLEMENTATION
-            if len(provider_names_bl) > 0: # blacklisting
-                if name in provider_names_bl: # match name
-                    blacklisted=True
-                    if name not in seen_rejected: # prince once when verbose
-                        print(f'[filterms] \033[5mREJECTED\033[0m offer from {name}, reason: blacklisted!', file=sys.stderr, flush=True)
-                    seen_rejected.add(name)
-                elif _partial_match_in(offer.issuer, provider_names_bl): # partial match node address
-                    blacklisted=True
-                    if name not in seen_rejected: # print once when verbose
-                        print(f'[filterms] \033[5mREJECTED\033[0m offer from {name}, reason: blacklisted!', file=sys.stderr, flush=True)
-                    seen_rejected.add(name)
-                if blacklisted:
-                    score = SCORE_REJECTED
+        self._previously_rejected = set()
+        self._seen_providers = set()
 
-            if not blacklisted and len(provider_names) > 0: # whitelisting
-                if name in provider_names: # match name
-                    score = await self.base_strategy.score_offer(offer)
-                elif _partial_match_in(offer.issuer, provider_names): # partial match node address
-                    score = await self.base_strategy.score_offer(offer)
+        # print(
+        #     f"[filterms] TO SEE ALL REJECTIONS SET THE ENVIRONMENT VARIABLE FILTERMSVERBOSE TO 1",
+        #     file=sys.stderr,
+        # )
+
+        self._providerInfo_bl = set()
+        self._providerInfo_wl = set()
+        self._providersSeenSoFar = set()
+        self._providersBlacklistedSoFar = set()
+
+        self._logger.debug(f"filtering providers with cpu features in {self._features}")
+
+    async def _is_allowed(self, provider_id):
+        try:
+
+            def _lookup_provider_by_id(self, provider_id):
+                """find matching providerInfo"""
+                matched = list(
+                    filter(
+                        lambda providerInfo: provider_id == providerInfo.provider_id,
+                        self._providersSeenSoFar,
+                    )
+                )
+                if len(matched) != 1:
+                    emsg = "fatal error! provider_id not stored internally!"
+                    self._logger.critical(e)
+                    raise Exception(e)
+                return matched[0]
+
+            matched_on_blacklist = True
+            matched_on_whitelist = False
+            matched_on_features = False
+            # matched_on_secondary_criteria = True # TODO
+            allowed = False
+
+            providerInfo = _lookup_provider_by_id(self, provider_id)
+
+            # if providerInfo in self._providersBlacklistedSoFar:
+            #     self._logger.debug("UNEXPECTED REPEAT OFFER!")
+            #     return False
+
+            # check blacklist
+            matching_bl = list(
+                filter(
+                    lambda providerInfo: provider_id == providerInfo.provider_id,
+                    self._providerInfo_bl,
+                )
+            )
+            matched_on_blacklist = len(matching_bl) == 1
+
+            if matched_on_blacklist:
+                self._logger.debug(
+                    f"{providerInfo} rejected due to blacklist membership"
+                )
+
+            if not matched_on_blacklist:
+                if len(self._providerInfo_wl) > 0:
+                    # check whitelist
+                    matching_wl = list(
+                        filter(
+                            lambda providerInfo: provider_id
+                            == providerInfo.provider_id,
+                            self._providerInfo_wl,
+                        )
+                    )
+                    matched_on_whitelist = len(matching_wl) > 0
                 else:
-                    score = SCORE_REJECTED
+                    matched_on_whitelist = True
 
-                if score != SCORE_REJECTED and score != None:
-                    print(f'[filterms] ACCEPTED offer from {name} scored at: {score}', file=sys.stderr, flush=True)
-                    if VERBOSE:
-                        print(f'\n{offer.props}\n')
-                else:
-                    if VERBOSE and name not in seen_rejected: # print once when verbose
-                        print(f'[filterms] \033[5mREJECTED\033[0m offer from {name}, reason: not whitelisted!', file=sys.stderr, flush=True)
-                    seen_rejected.add(name)
+            matched_on_features = providerInfo.check_cpu_capabilities(self._features)
 
-
-            if score==None:
-                score=await self.base_strategy.score_offer(offer)
+            if not matched_on_features:
+                self._logger.debug(
+                    f"{providerInfo} rejected due to missing cpu feature(s)"
+                )
+                # self._logger.debug(
+                #     f"the following provider did not have the required feature(s):"
+                #     f" {providerInfo}"
+                #     f"\n{providerInfo.cpu_capabilities}"
+                # )
 
         except Exception as e:
-            print("[filterms] AN UNHANDLED EXCEPTION OCCURRED", file=sys.stderr)
-            print(e, file=sys.stderr)
+            self._logger.critical(f"_is_allowed an unhandled exception {e}")
+            raise e
 
-        return score
+        allowed = (
+            (not matched_on_blacklist)
+            and matched_on_whitelist
+            and matched_on_features
+            # and matched_on_secondary_criteria
+        )
 
+        if not allowed:
+            self._providersBlacklistedSoFar.add(providerId)
 
+        return allowed
 
+    # /              __init__                                                 >
+
+    async def score_offer(self, offer) -> float:
+        def _extract_provider_info_from_offer(offer):
+            return offer.props["golem.node.id.name"], offer.issuer
+
+        try:
+            providerInfo = _ProviderInfo(
+                *_extract_provider_info_from_offer(offer),
+                offer.props["golem.inf.cpu.capabilities"],
+            )
+            # if providerInfo.name == "witek":
+            #     self._logger.debug(f"WITEK\n\n{offer.props}")
+
+            self._providersSeenSoFar.add(providerInfo)
+            if any(
+                map(
+                    lambda candidate: providerInfo.fuzzy_matches(candidate),
+                    self._provider_fuzzy_bl,
+                )
+            ):
+                # add to internal set of blacklisted providers
+                self._providerInfo_bl.add(providerInfo)
+            elif any(
+                map(
+                    lambda candidate: providerInfo.fuzzy_matches(candidate),
+                    self._provider_fuzzy_wl,
+                )
+            ):
+                self._providerInfo_wl.add(providerInfo)
+
+        except Exception as e:
+            self._logger.critical(f"an unhandled exception {e} occurred")
+
+        return await super().score_offer(offer)
