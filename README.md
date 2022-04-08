@@ -1,11 +1,11 @@
 # gc__filterms
 a package that facilitates whitelisting or blacklisting on Golem from the command line
 
-compatible with yapapi 0.9
+compatible with yapapi 0.9. now with cpu features filtering.
 
 _**learn how Golem is changing the status quo, a thousand processors at a time! visit https://www.golem.network**_
 
-gc__filterms solves the problem of seeing tasks go to providers that are not performing or behaving well. it is a tool to empower the requestor to avoid (or select) providers of interest. specifically, it augments any current strategy the requestor script has designed by checking offers against criteria to filter for or against, currently filtering only on provider names and node addresses (partial ok).
+gc__filterms solves the problem of seeing tasks go to providers that are not performing or behaving well. it is a tool to empower the requestor to avoid (or select) providers of interest. specifically, it augments any current strategy the requestor script has designed by checking offers against criteria to filter for or against, currently filtering only on provider names and node addresses (partial ok) or cpu features.
 
 # usage
 first clone the repo directory into your script directory
@@ -37,6 +37,7 @@ set the environment variable and run the script, as in:
 requestor$ GNPROVIDER=bristlecone python3 script.py
 requestor$ GNPROVIDER=[azathoth-rnd,mf] python3 script.py
 requestor$ GNPROVIDER_BL=[rustedrobbie,psychocalvin,sycamore] python3 script.py
+requestor$ FILTERMSVERBOSE=1 GNFEATURES=[processor_trace] GNPROVIDER=[etam,ubuntu-2rec,witek,golem2005,mf] GNPROVIDER_BL=[sycamore] ./script.py
 # or export first, notice addresses are permitted
 requestor$ export GNPROVIDER_BL=[0x4316e,0x65df,0xb6abad,sycamore]
 requestor$ python3 script.py
@@ -145,8 +146,7 @@ else:
 ```
 
 # comments
-if you do not set the GNPROVIDER environment variable, the script passes the default LeastExpensiveLinearPayuMS to run as normal.
-ref: https://github.com/golemfactory/yapapi/blob/0.7.0/yapapi/engine.py#L134
+if you do not set the GNPROVIDER environment variable, the script passes the default LeastExpensiveLinearPayuMS with sane defaults.
 
 # conclusion
-this is a third rendition of a package/suite that aims to provide more convenience and flexbility to requestors on top of yapapi for testing (current state) or enhancing (planned features). stay tuned for further developments.
+this is a fourth rendition of a package/suite that aims to provide more convenience and flexbility to requestors on top of yapapi for testing (current state) or enhancing (planned features). stay tuned for further developments inlcuding more integration with gc__listoffers.
