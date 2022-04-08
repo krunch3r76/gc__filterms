@@ -7,6 +7,16 @@ _**learn how Golem is changing the status quo, a thousand processors at a time! 
 
 gc__filterms solves the problem of seeing tasks go to providers that are not performing or behaving well. it is a tool to empower the requestor to avoid (or select) providers of interest. specifically, it augments any current strategy the requestor script has designed by checking offers against criteria to filter for or against, currently filtering only on provider names and node addresses (partial ok) or cpu features.
 
+# video example
+
+
+
+https://user-images.githubusercontent.com/46289600/162363991-9dfaabc7-077b-44c3-a27a-43b8bc870bcf.mp4
+
+
+
+
+
 # usage
 first clone the repo directory into your script directory
 
