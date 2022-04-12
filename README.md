@@ -71,9 +71,6 @@ python script.py
 > .\script.ps1
 ```
 
-> $env:FILTERMSVERBOSE=1; $env:GNFEATURES="[processor_trace]"; $env:GNPROVIDER="[etam,ubuntu-2rec,witek,golem2005,mf]"; $env:GNPROVIDER_BL="[sycamore]"; python script.py
-
-```
 ### note: when filtering by address, filtering is against the node address, not the wallet address
 
 ## specific examples
