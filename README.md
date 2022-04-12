@@ -53,6 +53,12 @@ requestor$ export GNPROVIDER_BL=[0x4316e,0x65df,0xb6abad,sycamore]
 requestor$ python3 script.py
 #etc
 ```
+
+in powershell
+```powershell
+> $ENV:GNPROVIDER="[etam]"
+> python3 script.py
+```
 ### note: when filtering by address, filtering is against the node address, not the wallet address
 
 ## specific examples
