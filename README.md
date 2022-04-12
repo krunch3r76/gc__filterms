@@ -56,8 +56,23 @@ requestor$ python3 script.py
 
 in powershell
 ```powershell
-> $ENV:GNPROVIDER="[etam]"
+> $env:GNPROVIDER="[etam]"
 > python3 script.py
+```
+or create a new text file **script.ps1** with the following content:
+```
+$env:FILTERMSVERBOSE=1
+$env:GNFEATURES="[processor_trace]"
+$env:GNPROVIDER="[etam,ubuntu-2rec,witek,golem2005,mf]"
+$env:GNPROVIDER_BL="[sycamore]"
+python script.py
+```
+```powershell
+> .\script.ps1
+```
+
+> $env:FILTERMSVERBOSE=1; $env:GNFEATURES="[processor_trace]"; $env:GNPROVIDER="[etam,ubuntu-2rec,witek,golem2005,mf]"; $env:GNPROVIDER_BL="[sycamore]"; python script.py
+
 ```
 ### note: when filtering by address, filtering is against the node address, not the wallet address
 
