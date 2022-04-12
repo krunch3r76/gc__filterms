@@ -195,7 +195,7 @@ class FilterProviderMS(ProviderFilter):
         self._features = features
 
         if base_strategy == None:
-            base_strategy = initialize_default_strategy()
+            base_strategy = _initialize_default_strategy()
         super().__init__(base_strategy, is_allowed=self._is_allowed)
 
         self._previously_rejected = set()
