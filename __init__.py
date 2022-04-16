@@ -230,8 +230,8 @@ class FilterProviderMS(ProviderFilter):
                     raise Exception(e)
                 return matched[0]
 
-            matched_on_blacklist = True
-            matched_on_whitelist = False
+            matched_on_blacklist = False
+            matched_on_whitelist = True
             matched_on_features = False
             # matched_on_secondary_criteria = True # TODO
             allowed = False
@@ -255,10 +255,10 @@ class FilterProviderMS(ProviderFilter):
                 self._logger.debug(
                     f"{providerInfo} rejected due to blacklist membership"
                 )
-
-            if not matched_on_blacklist:
+            else: # can consider whether there is a whitelist (blist prioritized)
                 if len(self._providerInfo_wl) > 0:
                     # check whitelist
+                    matched_on_whitelist = False # ensure not on list rejected
                     matching_wl = list(
                         filter(
                             lambda providerInfo: provider_id
@@ -267,8 +267,8 @@ class FilterProviderMS(ProviderFilter):
                         )
                     )
                     matched_on_whitelist = len(matching_wl) > 0
-                else:
-                    matched_on_whitelist = True
+                # else:
+                #     matched_on_whitelist = True
 
             matched_on_features = providerInfo.check_cpu_capabilities(self._features)
 
