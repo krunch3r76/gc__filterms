@@ -1,4 +1,7 @@
-# ipc.py
+# ipc_server.py
+# authored by krunch3r76 (https://github.com/krunch3r76)
+# license GPL
+
 # create a single subscriber ipc (unix socket/windows named pipe)
 
 from multiprocessing.connection import Listener

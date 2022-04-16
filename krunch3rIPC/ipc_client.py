@@ -1,3 +1,7 @@
+# ipc_client.py
+# authored by krunch3r76 (https://github.com/krunch3r76)
+# license GPL
+
 from pathlib import Path
 from tempfile import gettempdir
 from time import sleep
