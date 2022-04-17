@@ -255,7 +255,7 @@ class FilterProviderMS(ProviderFilter):
                 self._logger.debug(
                     f"{providerInfo} rejected due to blacklist membership"
                 )
-            else: # can consider whether there is a whitelist (blist prioritized)
+            elif len(self._provider_fuzzy_wl) > 0: # whitelisting activated
                 if len(self._providerInfo_wl) > 0:
                     # check whitelist
                     matched_on_whitelist = False # ensure not on list rejected
@@ -267,8 +267,9 @@ class FilterProviderMS(ProviderFilter):
                         )
                     )
                     matched_on_whitelist = len(matching_wl) > 0
-                # else:
-                #     matched_on_whitelist = True
+                else:
+                    matched_on_whitelist = False # whitelisting requested but not a match
+                    self._logger.debug(f"rejected {providerInfo}, not on whitelist")
 
             matched_on_features = providerInfo.check_cpu_capabilities(self._features)
 
@@ -305,12 +306,14 @@ class FilterProviderMS(ProviderFilter):
             return offer.props["golem.node.id.name"], offer.issuer
 
         try:
+
             providerInfo = _ProviderInfo(
                 *_extract_provider_info_from_offer(offer),
                 offer.props["golem.inf.cpu.capabilities"],
             )
-            # if providerInfo.name == "witek":
-            #     self._logger.debug(f"WITEK\n\n{offer.props}")
+
+            
+            name = _extract_provider_info_from_offer(offer)
 
             self._providersSeenSoFar.add(providerInfo)
             if any(
