@@ -224,10 +224,10 @@ class FilterProviderMS(ProviderFilter):
                         self._providersSeenSoFar,
                     )
                 )
-                if len(matched) != 1:
+                if len(matched) < 1:  # should be 1...
                     emsg = "fatal error! provider_id not stored internally!"
-                    self._logger.critical(e)
-                    raise Exception(e)
+                    self._logger.critical(emsg)
+                    # raise Exception(emsg)
                 return matched[0]
 
             matched_on_blacklist = False
@@ -255,10 +255,10 @@ class FilterProviderMS(ProviderFilter):
                 self._logger.debug(
                     f"{providerInfo} rejected due to blacklist membership"
                 )
-            elif len(self._provider_fuzzy_wl) > 0: # whitelisting activated
+            elif len(self._provider_fuzzy_wl) > 0:  # whitelisting activated
                 if len(self._providerInfo_wl) > 0:
                     # check whitelist
-                    matched_on_whitelist = False # ensure not on list rejected
+                    matched_on_whitelist = False  # ensure not on list rejected
                     matching_wl = list(
                         filter(
                             lambda providerInfo: provider_id
@@ -268,7 +268,9 @@ class FilterProviderMS(ProviderFilter):
                     )
                     matched_on_whitelist = len(matching_wl) > 0
                 else:
-                    matched_on_whitelist = False # whitelisting requested but not a match
+                    matched_on_whitelist = (
+                        False  # whitelisting requested but not a match
+                    )
                     self._logger.debug(f"rejected {providerInfo}, not on whitelist")
 
             matched_on_features = providerInfo.check_cpu_capabilities(self._features)
@@ -284,7 +286,7 @@ class FilterProviderMS(ProviderFilter):
                 # )
 
         except Exception as e:
-            self._logger.critical(f"_is_allowed an unhandled exception {e}")
+            self._logger.critical(f"_is_allowed threw an unhandled exception: {e}")
             raise e
 
         allowed = (
@@ -309,10 +311,11 @@ class FilterProviderMS(ProviderFilter):
 
             providerInfo = _ProviderInfo(
                 *_extract_provider_info_from_offer(offer),
-                offer.props["golem.inf.cpu.capabilities"],
+                offer.props.get(
+                    "golem.inf.cpu.capabilities", []
+                ),  # kludge to handle missing field
             )
 
-            
             name = _extract_provider_info_from_offer(offer)
 
             self._providersSeenSoFar.add(providerInfo)
@@ -333,6 +336,6 @@ class FilterProviderMS(ProviderFilter):
                 self._providerInfo_wl.add(providerInfo)
 
         except Exception as e:
-            self._logger.critical(f"an unhandled exception {e} occurred")
+            self._logger.critical(f"an unhandled exception: {e}, occurred")
 
         return await super().score_offer(offer)
