@@ -297,7 +297,7 @@ class FilterProviderMS(ProviderFilter):
         )
 
         if not allowed:
-            self._providersBlacklistedSoFar.add(providerId)
+            self._providersBlacklistedSoFar.add(provider_id)
 
         return allowed
 
