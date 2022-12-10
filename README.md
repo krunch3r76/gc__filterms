@@ -1,7 +1,7 @@
 # gc__filterms
 a package that facilitates whitelisting or blacklisting on Golem from the command line
 
-compatible with yapapi 0.9. now with cpu features filtering. **NOTE: as of Decemer 8, 2022, golem network is undergoing an awkward upgrade and this project may not run until golem finishes its new SDK and network services, after which this project shall be updated if needed**
+compatible with yapapi 0.10.0 along with Marble Castle. now with cpu features filtering. network filtering coming soon.
 
 _**learn how Golem is changing the status quo, a thousand processors at a time! visit https://www.golem.network**_
 
