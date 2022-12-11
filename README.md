@@ -42,7 +42,7 @@ async with Golem(
         #...
 ```
 ## quickstart overview
-set the environment variable and run the script, as in:
+set the environment variables to whitelist and/or blacklist providers and run the script, as in:
 ```bash
 requestor$ GNPROVIDER=bristlecone python3 script.py
 requestor$ GNPROVIDER=[azathoth-rnd,mf] python3 script.py
