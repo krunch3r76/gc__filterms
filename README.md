@@ -23,7 +23,7 @@ first clone the repo directory into your script directory
 `$ git clone https://github.com/krunch3r76/gc__filterms`
 
 
-## script file setup
+## set up your python script
 
 add the following import statement to the py script that instantiates the Golem object
 
@@ -73,7 +73,7 @@ python script.py
 
 ### note: when filtering by address, filtering is against the node address, not the wallet address
 
-## specific examples
+## advanced examples
 
 ### multiple providers
 `requestor$ GNPROVIDER=[qbam,etam] ./ssh.py`
