@@ -44,10 +44,7 @@ It works out‑of‑the‑box with **Yapapi 0.10.0** and *Marble Castle*, and 
 
 Watch a quick walkthrough of how to use the tool:
 
-<video width="640" height="360" controls>
-  <source src="https://user-images.githubusercontent.com/46289600/162363991-9dfaabc7-077b-44c3-a27a-43b8bc870bcf.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+[![Demo](https://user-images.githubusercontent.com/46289600/162363991-9dfaabc7-077b-44c3-a27a-43b8bc870bcf.mp4)](https://user-images.githubusercontent.com/46289600/162363991-9dfaabc7-077b-44c3-a27a-43b8bc870bcf.mp4)
 
 ---
 
