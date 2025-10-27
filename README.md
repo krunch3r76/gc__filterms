@@ -2,7 +2,7 @@
 *A lightweight provider‑whitelisting / blacklisting helper for Golem*  
 
 `gc__filterms` lets you filter the list of offers that Yapapi receives from the Golem network.  
-It works out‑of‑the‑box with **Yapapi 0.10.0** and *Marble Castle*, and now supports filtering by CPU features (network filtering is coming soon).
+It works out‑of‑the‑box with **Yapapi 0.13.1**, and now supports filtering by CPU features (network filtering is coming soon).
 
 > **Why it matters** –  
 >  When you run a requestor script, you often want to avoid providers that are slow, unreliable or simply not the right fit for your workload. `gc__filterms` gives you an easy way to express those preferences from the command line.
@@ -55,7 +55,7 @@ Watch a quick walkthrough of how to use the tool:
 git clone https://github.com/krunch3r76/gc__filterms
 ```
 
-No additional Python packages are required – it ships with Yapapi 0.10.0.
+No additional Python packages are required – it sails with Yapapi 0.13.1.
 
 ---
 
