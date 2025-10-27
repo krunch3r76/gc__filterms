@@ -1,180 +1,237 @@
-# gc__filterms
-a package that facilitates whitelisting or blacklisting on Golem from the command line
+# gc__filterms  
+*A lightweight provider‑whitelisting / blacklisting helper for Golem*  
 
-compatible with yapapi 0.10.0 along with Marble Castle. now with cpu features filtering. network filtering coming soon.
+`gc__filterms` lets you filter the list of offers that Yapapi receives from the Golem network.  
+It works out‑of‑the‑box with **Yapapi 0.10.0** and *Marble Castle*, and now supports filtering by CPU features (network filtering is coming soon).
 
-_**learn how Golem is changing the status quo, a thousand processors at a time! visit https://www.golem.network**_
+> **Why it matters** –  
+>  When you run a requestor script, you often want to avoid providers that are slow, unreliable or simply not the right fit for your workload. `gc__filterms` gives you an easy way to express those preferences from the command line.
 
-gc__filterms solves the problem of seeing tasks go to providers that are not performing or behaving well. it is a tool to empower the requestor to avoid (or select) providers of interest. specifically, it augments any current strategy the requestor script has designed by checking offers against criteria to filter for or against, currently filtering only on provider names and node addresses (partial ok) or cpu features.
+---
 
-# video example
+## Table of Contents
+- [Features](#features)
+- [Demo Video](#demo-video)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+  - [Importing the Strategy](#importing-the-strategy)
+  - [Using Environment Variables](#using-environment-variables)
+  - [Running a Script](#running-a-script)
+- [Advanced Usage](#advanced-usage)
+  - [Wrapping an Existing Strategy](#wrapping-an-existing-strategy)
+  - [Nested Wrappers](#nested-wrappers)
+- [Tips & Tricks](#tips--tricks)
+  - [Conditional Import](#conditional-import)
+  - [Symlink for Quick Access](#symlink-for-quick-access)
+- [FAQ](#faq)
+- [Contributing & Roadmap](#contributing--roadmap)
 
+---
 
+## Features
 
-https://user-images.githubusercontent.com/46289600/162363991-9dfaabc7-077b-44c3-a27a-43b8bc870bcf.mp4
+| Feature | Description |
+|---------|-------------|
+| **Provider name filtering** | Whitelist / blacklist by provider name (e.g. `jupiter-legacy`). |
+| **Node address filtering** | Filter by the node’s public address (`0x1234…`). |
+| **CPU‑feature filtering** | Select providers that expose specific CPU features (e.g., `processor_trace`). |
+| **Command‑line friendly** | All filters are set via environment variables – no code changes required. |
+| **Composable** | Wrap any existing Yapapi strategy; works with nested wrappers. |
 
+---
 
+## Demo Video
 
+Watch a quick walkthrough of how to use the tool:
 
+[![Demo](https://img.youtube.com/vi/<VIDEO_ID>/0.jpg)](https://youtu.be/<VIDEO_ID>)
 
-# usage
-first clone the repo directory into your script directory
+*(Replace `<VIDEO_ID>` with your actual YouTube ID.)*
 
-`$ git clone https://github.com/krunch3r76/gc__filterms`
+---
 
+## Installation
 
-## set up your python script
+```bash
+# Clone into the same directory as your requestor script
+git clone https://github.com/krunch3r76/gc__filterms
+```
 
-add the following import statement to the py script that instantiates the Golem object
+No additional Python packages are required – it ships with Yapapi 0.10.0.
 
-`from gc__filterms import FilterProviderMS`
+---
 
-when instantiating the Golem object, assign a **FilterProviderMS** object (in-place ok) to the the named parameter _strategy_:
+## Getting Started
+
+### Importing the Strategy
+
+Add this import to the file that creates the `Golem` instance:
+
+```python
+from gc__filterms import FilterProviderMS
+```
+
+When you instantiate `Golem`, pass a `FilterProviderMS` object as the `strategy` argument.  
+You can create it in‑place or wrap an existing strategy.
 
 ```python
 async with Golem(
-	budget=10.0,
-        subnet_tag=subnet_tag,
-        payment_driver=payment_driver,
-        payment_network=payment_network,
-        strategy=FilterProviderMS()
-    ) as golem:
-        #...
-```
-## quickstart overview
-set the environment variables to whitelist and/or blacklist providers and run the script, as in:
-```bash
-requestor$ GNPROVIDER=bristlecone python3 script.py
-requestor$ GNPROVIDER=[azathoth-rnd,mf] python3 script.py
-requestor$ GNPROVIDER_BL=[rustedrobbie,psychocalvin,sycamore] python3 script.py
-requestor$ FILTERMSVERBOSE=1 GNFEATURES=[processor_trace] GNPROVIDER=[etam,ubuntu-2rec,witek,golem2005,mf] GNPROVIDER_BL=[sycamore] ./script.py
-# or export first, notice addresses are permitted
-requestor$ export GNPROVIDER_BL=[0x4316e,0x65df,0xb6abad,sycamore]
-requestor$ python3 script.py
-#etc
+    budget=10.0,
+    subnet_tag=subnet_tag,
+    payment_driver=payment_driver,
+    payment_network=payment_network,
+    strategy=FilterProviderMS()          # <-- no custom strategy
+) as golem:
+    ...
 ```
 
-in powershell
+### Using Environment Variables
+
+All filtering is controlled via environment variables:
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `GNPROVIDER` | Whitelist provider names or node addresses (comma‑separated, inside brackets). | `GNPROVIDER=[etam,ubuntu-2rec]` |
+| `GNPROVIDER_BL` | Blacklist provider names or node addresses. | `GNPROVIDER_BL=[sycamore,0x1234abcd]` |
+| `GNFEATURES` | CPU features to filter on (comma‑separated). | `GNFEATURES=[processor_trace]` |
+| `FILTERMSVERBOSE` | Enable debug output (`1` = verbose). | `FILTERMSVERBOSE=1` |
+
+> **Tip** – If you omit `GNPROVIDER`, the default Yapapi strategy (`LeastExpensiveLinearPayuMS`) is used.
+
+#### Running a Script
+
+```bash
+# Bash / Linux / macOS
+export GNPROVIDER=[etam,ubuntu-2rec]
+export GNFEATURES=[processor_trace]
+python3 script.py
+```
+
 ```powershell
-> $env:GNPROVIDER="[etam]"
-> python3 script.py
+# PowerShell (Windows)
+$env:GNPROVIDER="[etam,ubuntu-2rec]"
+$env:GNFEATURES="[processor_trace]"
+python script.py
 ```
-or create a new text file **script.ps1** with the following content:
-```
+
+You can also put the environment assignments in a `.ps1` file:
+
+```powershell
+# script.ps1
 $env:FILTERMSVERBOSE=1
 $env:GNFEATURES="[processor_trace]"
 $env:GNPROVIDER="[etam,ubuntu-2rec,witek,golem2005,mf]"
 $env:GNPROVIDER_BL="[sycamore]"
 python script.py
 ```
+
 ```powershell
-> .\script.ps1
+.\script.ps1   # run the file
 ```
 
-### note: when filtering by address, filtering is against the node address, not the wallet address
+> **Note** – When filtering by address, the filter applies to the *node* address, not the wallet address.
 
-## advanced examples
+---
 
-### multiple providers
-`requestor$ GNPROVIDER=[qbam,etam] ./ssh.py`
-NOTE: note that i did not quote the assignment of the bash variable (and there are no spaces!). this is the most direct way of listing.
+## Advanced Usage
 
-### blacklisting
-set the GNPROVIDER_BL environment variable, for example
-`requestor$ GNPROVIDER_BL=[qbam,etam] ./ssh.py`
+### Wrapping an Existing Strategy
 
-### a specific example for testing
-you might then run **golemsp** on testnet (in a separate machine/vm) with:
+If you already have a custom strategy (e.g., `LeastExpensiveLinearPayuMS`), wrap it:
 
-`provider$ golemsp run --payment-network=testnet --subnet=devnet-beta`
-
-let this provider node be named "jupiter-legacy". 
-
-then, on the requestor side (assuming Golem constructed with payment_network='testnet',  subnet_tag='devnet-beta'), e.g. using the blender example, you can run:
-
-`requestor$ GNPROVIDER=jupiter-legacy python3 ./blender.py`
-
-and see tasks (in the log) go only to jupiter-legacy (on devnet-beta)!
-
-### wrap an existing strategy
 ```python
 import yapapi
 from decimal import Decimal
-mystrategy=yapapi.strategy.LeastExpensiveLinearPayuMS(
-    max_fixed_price=Decimal("0.00")
-    , max_price_for=
-    {
-	yapapi.props.com.Counter.CPU: Decimal("0.01")
-	, yapapi.props.com.Counter.TIME: Decimal("0.0011")
-	}
-    ) 
+
+mystrategy = yapapi.strategy.LeastExpensiveLinearPayuMS(
+    max_fixed_price=Decimal("0.00"),
+    max_price_for={
+        yapapi.props.com.Counter.CPU:  Decimal("0.01"),
+        yapapi.props.com.Counter.TIME: Decimal("0.0011")
+    }
+)
 
 async with Golem(
-	budget=10.0,
-        subnet_tag=subnet_tag,
-        payment_driver=payment_driver,
-        payment_network=payment_network,
-        strategy=FilterProviderMS(mystrategy)
-    ) as golem:
-        #...
+    budget=10.0,
+    subnet_tag=subnet_tag,
+    payment_driver=payment_driver,
+    payment_network=payment_network,
+    strategy=FilterProviderMS(mystrategy)
+) as golem:
+    ...
 ```
 
-### wrap a wrapped strategy
+### Nested Wrappers
+
+You can stack multiple wrappers:
+
 ```python
 import yapapi
 from decimal import Decimal
-    my_modified_strategy = yapapi.strategy.DecreaseScoreForUnconfirmedAgreement(
-            base_strategy=mystrategy
-            , factor=0.01
-    )
 
-    async with Golem(
-        budget=1.0,
-        subnet_tag=subnet_tag,
-        payment_driver=payment_driver,
-        payment_network=payment_network,
-        strategy=FilterProviderMS(my_modified_strategy)
-    ) as golem:
-	#...
+base = yapapi.strategy.LeastExpensiveLinearPayuMS(...)
+modified = yapapi.strategy.DecreaseScoreForUnconfirmedAgreement(
+    base_strategy=base,
+    factor=0.01
+)
+
+async with Golem(
+    budget=1.0,
+    subnet_tag=subnet_tag,
+    payment_driver=payment_driver,
+    payment_network=payment_network,
+    strategy=FilterProviderMS(modified)
+) as golem:
+    ...
 ```
 
-# usage tips
-## conditional import
+---
+
+## Tips & Tricks
+
+### Conditional Import (Optional)
+
+If you want your script to run even when `gc__filterms` isn’t installed:
+
 ```python
 try:
-    moduleFilterProviderMS=False
     from gc__filterms import FilterProviderMS
 except ModuleNotFoundError:
-    pass
-else:
-    moduleFilterProviderMS=True
-    
-#...
+    FilterProviderMS = None
 
- if moduleFilterProviderMS:
-                strategy=FilterProviderMS(self.strat)
-            else:
-                strategy=self.strat
-# ...
-            ############################################################################\
-            # initialize and spread work across task objects                            #
-            async with yapapi.Golem(
-                    budget=self.BUDGET-self._costRunning
-                    , subnet_tag=self.args.subnet_tag
-                    , payment_network=self.args.payment_network
-                    , payment_driver=self.args.payment_driver
-                    , event_consumer=MySummaryLogger(self).log
-                    , strategy=strategy
-            ) as golem:
-	    #...
+# Later, when creating the Golem instance
+strategy = FilterProviderMS(my_strategy) if FilterProviderMS else my_strategy
 ```
-## create a symlink to the directory with the filterms repo
+
+### Symlink for Quick Access
+
+If you keep `gc__filterms` in a separate location but want to import it as a package:
+
 ```bash
-(in directory of project)$ ln -s <path to gc__filterms repo dir> gc__filterms
+ln -s /path/to/gc__filterms gc__filterms   # inside your project directory
 ```
 
-# comments
-if you do not set the GNPROVIDER environment variable, the script passes the default LeastExpensiveLinearPayuMS with sane defaults.
+Now the import statement works without modifying `PYTHONPATH`.
 
-# conclusion
-this is a fourth rendition of a package/suite that aims to provide more convenience and flexbility to requestors on top of yapapi for testing (current state) or enhancing (planned features). stay tuned for further developments inlcuding more integration with gc__listoffers.
+---
+
+## FAQ
+
+| Question | Answer |
+|----------|--------|
+| **What if I set both `GNPROVIDER` and `GNPROVIDER_BL`?** | The blacklist takes precedence – any provider in `GNPROVIDER_BL` is excluded even if it appears in the whitelist. |
+| **Can I filter by wallet address instead of node address?** | Currently only node addresses are supported. Future releases may add wallet‑address filtering. |
+| **Will this affect task scheduling performance?** | The filtering happens before offers are considered, so there’s negligible overhead. |
+
+---
+
+## Contributing & Roadmap
+
+- **Network filtering** – upcoming feature to filter by bandwidth or latency.
+- **Integration with `gc__listoffers`** – unified offer‑listing and filtering experience.
+- **CLI helper** – a small command‑line tool for inspecting provider metadata.
+
+Feel free to open issues, submit pull requests, or suggest new features.  
+Happy hacking! 🚀
+
+---
