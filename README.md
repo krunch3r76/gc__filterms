@@ -44,9 +44,10 @@ It works out‑of‑the‑box with **Yapapi 0.10.0** and *Marble Castle*, and 
 
 Watch a quick walkthrough of how to use the tool:
 
-[![Demo](https://img.youtube.com/vi/<VIDEO_ID>/0.jpg)](https://youtu.be/<VIDEO_ID>)
-
-*(Replace `<VIDEO_ID>` with your actual YouTube ID.)*
+<video width="640" height="360" controls>
+  <source src="https://user-images.githubusercontent.com/46289600/162363991-9dfaabc7-077b-44c3-a27a-43b8bc870bcf.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ---
 
