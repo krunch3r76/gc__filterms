@@ -69,6 +69,15 @@ Add this import to the file that creates the `Golem` instance:
 from gc__filterms import FilterProviderMS
 ```
 
+Or to make it optional:
+
+```python
+try:
+    from gc__filterms import FilterProviderMS  # type: ignore
+except Exception:
+    FilterProviderMS = lambda x: x
+```
+
 When you instantiate `Golem`, pass a `FilterProviderMS` object as the `strategy` argument.  
 You can create it in‑place or wrap an existing strategy.
 
@@ -186,20 +195,6 @@ async with Golem(
 ---
 
 ## Tips & Tricks
-
-### Conditional Import (Optional)
-
-If you want your script to run even when `gc__filterms` isn’t installed:
-
-```python
-try:
-    from gc__filterms import FilterProviderMS
-except ModuleNotFoundError:
-    FilterProviderMS = None
-
-# Later, when creating the Golem instance
-strategy = FilterProviderMS(my_strategy) if FilterProviderMS else my_strategy
-```
 
 ### Symlink for Quick Access
 

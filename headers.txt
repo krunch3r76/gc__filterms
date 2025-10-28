@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+date: Mon, 27 Oct 2025 20:51:02 GMT
+server: uvicorn
+content-type: text/html; charset=utf-8
+accept-ranges: bytes
+content-length: 7008
+last-modified: Mon, 20 Oct 2025 03:48:52 GMT
+etag: "d65ea6a1fdac6a0a0e7b30f5f0663310"
+vary: Accept-Encoding
+x-process-time: 0
+
